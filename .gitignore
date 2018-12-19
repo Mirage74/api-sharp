@@ -1,4 +1,7 @@
 node_modules/
 src/.idea/
+src/input.jpg
+src/out.jpg
+src/public
 .eslintrc.json
 list.git

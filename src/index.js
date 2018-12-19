@@ -5,7 +5,35 @@ const serve = require('koa-static')
 const logger = require('koa-logger')
 //const body = require('koa-better-body')
 //const convert = require('koa-convert')
-const  asyncBusboy = require('async-busboy')
+//const  asyncBusboy = require('async-busboy')
+const fs = require("fs")
+const koaBody = require('koa-body')
+//const AWS = require('aws-sdk');
+const AWS = require('aws-sdk/global');
+const S3 = require('aws-sdk/clients/s3')
+const sharp = require('sharp')
+const request = require('request')
+const http = require('http');
+const tmp = require('tmp');
+const typeIs = require('type-is');
+const util = require("util");
+const path = require('path');
+const url = require('url');
+const UTF8 = require('UTF-8')
+
+
+
+sharp('input.jpg')
+    .rotate(180)
+    .resize(400)
+    .toBuffer()
+    .then( data =>  {
+        const fdLog = fs.openSync("out.jpg", "w")
+        fs.appendFileSync(fdLog, data)
+        fs.closeSync(fdLog)
+        console.log("OK")
+    } )
+    .catch( err => err );
 
 
 const app = new Koa();
@@ -15,7 +43,7 @@ app.use(logger())
 app.use(bodyParser())
 //app.use(convert(body()))
 app.use(router.routes())
-app.listen(process.env.PORT || 4000)
+//app.listen(process.env.PORT || 4000)
 app.use(async (ctx, next) => {
     const origin = ctx.get('Origin');
     console.log(ctx.method)
@@ -35,27 +63,39 @@ app.use(async (ctx, next) => {
 })
 
 
-async function Gewt (ctx, next) {
-    const file = await asyncBusboy(ctx.req);
-
-    // Make some validation on the fields before upload to S3
-
-        return file
-
-}
-
-router.post('/convert', async(ctx, next) => {
-    const fl = Gewt(ctx, next).then (
-        res => {
-            let y = 5
-        }
-    )
-        .catch (err=>
-            {
-                let y = 5
-            }
-        )
 
 
+const server = http.createServer(function(req, res) {
+  let body = Buffer.alloc(0)
+  req.on('data', (chunk) => {
+    let nextBuffer = Buffer.alloc(chunk.length, chunk)
+    let arrBuf = [body, nextBuffer]
+    body = Buffer.concat(arrBuf)
+    //console.log("chunk.length : ", chunk.length)
+    //console.log("body.length : ", body.length)
+  })
+
+
+  req.on('end', () => {
+    //console.log('END')
+    const path = 'public/output.jpg'
+    fs.open(path, 'w', function(err, fd) {
+      if (err) {
+        throw 'error opening file: ' + err;
+      }
+      fs.write(fd, body, 0, body.length, null, function(err) {
+        if (err) throw 'error writing file: ' + err
+        fs.close(fd, function() {
+//          console.log('file written')
+        })
+      })
+    })
+    res.end(body.length.toString())
+    })
 })
+
+
+server.listen((process.env.PORT || 4000));
+
+
 
