@@ -18,7 +18,7 @@ const options = {
 }
 
 //fetch("http://localhost:4000", options)
-fetch("http://localhost:4000", options)
+fetch("https://resize-img.herokuapp.com/", options)
     .then(res => {
         const dest = fs.createWriteStream('./octocat.jpg');
         res.body.pipe(dest);
