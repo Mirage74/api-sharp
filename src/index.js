@@ -56,8 +56,8 @@ const server = http.createServer(function(req, res) {
   req.on('end', () => {
       sharp(body)
           .rotate(rotate)
-          .resize(resize, 200)
-          
+          .resize(resize, 100)
+
           .toBuffer()
           .then( data =>  {
               res.end(data)
