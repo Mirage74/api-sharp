@@ -17,7 +17,8 @@ const options = {
     headers: headersMy
 }
 
-fetch("http://localhost:4000/user?=", options)
+//fetch("http://localhost:4000", options)
+fetch("http://localhost:4000", options)
     .then(res => {
         const dest = fs.createWriteStream('./octocat.jpg');
         res.body.pipe(dest);
