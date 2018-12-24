@@ -1,27 +1,38 @@
 const http = require('http')
 const fs = require('fs')
-const fetch = require('node-fetch')
+const path = require('path')
+const {InputDir, OutputDir, rotate, resize, width_Or_Height, urlRest} = require('./config')
+const convOneImg = require("./sharp-one")
 
-const fileList = fs.readdirSync(".idea")
+
+if ( !fs.existsSync(OutputDir) ) {
+    fs.mkdirSync(OutputDir)
+}
 
 const headersMy = {
   "content-type" : "image/jpeg",
-  "width-or-height" : "w",
-  "resize" : "300",
-  "rotate" : "0"
+  "width-or-height" : width_Or_Height,
+  "resize" : resize,
+  "rotate" : rotate
 }
 
-const options = {
+
+let options = {
     method: 'POST',
-    body: fs.createReadStream("input.jpg"),
+    //body: fs.createReadStream("input.jpg"),
     headers: headersMy
 }
 
-//fetch("http://localhost:4000", options)
-fetch("https://resize-img.herokuapp.com/", options)
-    .then(res => {
-        const dest = fs.createWriteStream('./octocat.jpg');
-        res.body.pipe(dest);
-    })
+
+const dirents = fs.readdirSync(InputDir, { withFileTypes: true });
+const listInputFiles = dirents
+    .filter(dirent => !dirent.isDirectory())
+    .map(dirent => dirent.name);
 
 
+let fileOutName
+for (let i = 0; i < listInputFiles.length; i++) {
+  options.body = fs.createReadStream(path.resolve(InputDir, listInputFiles[i]))
+  fileOutName = path.resolve(OutputDir, listInputFiles[i])
+  convOneImg(urlRest, options, fileOutName)
+}

@@ -45,6 +45,7 @@ const server = http.createServer(function(req, res) {
 
 
   req.on('data', (chunk) => {
+    console.log("chunk")
     let nextBuffer = Buffer.alloc(chunk.length, chunk)
     let arrBuf = [body, nextBuffer]
     body = Buffer.concat(arrBuf)
@@ -55,7 +56,8 @@ const server = http.createServer(function(req, res) {
   req.on('end', () => {
       sharp(body)
           .rotate(rotate)
-          .resize(resize)
+          .resize(resize, 200)
+          
           .toBuffer()
           .then( data =>  {
               res.end(data)
